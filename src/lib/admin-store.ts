@@ -341,7 +341,8 @@ export function formatDateTime(iso: string | null): string {
   if (!iso) return "—";
   const d = new Date(iso);
   const pad = (n: number) => String(n).padStart(2, "0");
-  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${String(d.getFullYear()).slice(-2)} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  // Use UTC to keep SSR and client output identical (avoids hydration mismatch).
+  return `${pad(d.getUTCDate())}/${pad(d.getUTCMonth() + 1)}/${String(d.getUTCFullYear()).slice(-2)} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
 }
 
 export function formatCurrency(price: string, currency: "VND" | "USD"): string {
