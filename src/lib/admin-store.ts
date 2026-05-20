@@ -251,7 +251,7 @@ export const adminActions = {
       author: input.author || "Admin",
       cover: input.cover || "",
       excerpt: input.excerpt || "",
-      content: input.content || "",
+      blocks: input.blocks || [{ id: uid(), type: "paragraph", text: "" }],
       status: input.status || "draft",
       views: 0,
       createdAt: now,
