@@ -2,6 +2,17 @@ import { useSyncExternalStore } from "react";
 
 export type PostStatus = "draft" | "published" | "scheduled" | "hidden";
 
+export type ImageAlign = "left" | "center" | "right" | "full";
+
+export type ContentBlock =
+  | { id: string; type: "paragraph"; text: string }
+  | { id: string; type: "heading"; level: 2 | 3; text: string }
+  | { id: string; type: "quote"; text: string; cite?: string }
+  | { id: string; type: "list"; ordered: boolean; items: string[] }
+  | { id: string; type: "image"; src: string; caption: string; alt: string; align: ImageAlign }
+  | { id: string; type: "gallery"; images: { src: string; caption: string }[] }
+  | { id: string; type: "divider" };
+
 export interface BlogPost {
   id: string;
   title: string;
@@ -10,13 +21,26 @@ export interface BlogPost {
   author: string;
   cover: string;
   excerpt: string;
-  content: string;
+  blocks: ContentBlock[];
   status: PostStatus;
   views: number;
   createdAt: string;
   updatedAt: string;
   publishedAt: string | null;
 }
+
+export const newBlock = (type: ContentBlock["type"]): ContentBlock => {
+  const id = Math.random().toString(36).slice(2, 10);
+  switch (type) {
+    case "paragraph": return { id, type, text: "" };
+    case "heading": return { id, type, level: 2, text: "" };
+    case "quote": return { id, type, text: "", cite: "" };
+    case "list": return { id, type, ordered: false, items: [""] };
+    case "image": return { id, type, src: "", caption: "", alt: "", align: "center" };
+    case "gallery": return { id, type, images: [] };
+    case "divider": return { id, type };
+  }
+};
 
 export interface BlogCategory {
   id: string;
@@ -54,6 +78,16 @@ const defaultCategories: BlogCategory[] = [
   { id: "cat-marketing", name: "Marketing" },
 ];
 
+const sampleBlocks = (intro: string, img: string): ContentBlock[] => [
+  { id: uid(), type: "paragraph", text: intro },
+  { id: uid(), type: "heading", level: 2, text: "Bối cảnh thị trường" },
+  { id: uid(), type: "paragraph", text: "Thị trường nhân sự năm 2026 chứng kiến nhiều biến động lớn, đòi hỏi các doanh nghiệp phải linh hoạt thay đổi chiến lược." },
+  { id: uid(), type: "image", src: img, caption: "Ảnh minh họa: workspace hiện đại", alt: "workspace", align: "center" },
+  { id: uid(), type: "paragraph", text: "Sau đây là những điểm chính cần lưu ý cho mọi nhà quản trị nhân sự." },
+  { id: uid(), type: "list", ordered: true, items: ["Tự động hóa quy trình tuyển dụng", "Trải nghiệm ứng viên cá nhân hóa", "Tăng cường employer branding"] },
+  { id: uid(), type: "quote", text: "Doanh nghiệp thắng cuộc đua nhân tài là doanh nghiệp đầu tư sớm vào dữ liệu và trải nghiệm.", cite: "Báo cáo HR Trends 2026" },
+];
+
 const defaultPosts: BlogPost[] = [
   {
     id: uid(),
@@ -61,9 +95,12 @@ const defaultPosts: BlogPost[] = [
     slug: "xu-huong-tuyen-dung-2026",
     categoryId: "cat-recruit",
     author: "Nguyễn An",
-    cover: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=400",
+    cover: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800",
     excerpt: "Khám phá các xu hướng định hình thị trường nhân sự năm 2026.",
-    content: "<p>Nội dung chi tiết về xu hướng tuyển dụng...</p>",
+    blocks: sampleBlocks(
+      "Năm 2026 mở ra nhiều cơ hội và thách thức mới cho ngành nhân sự.",
+      "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1200",
+    ),
     status: "published",
     views: 1240,
     createdAt: "2026-04-12T08:30:00Z",
@@ -76,9 +113,9 @@ const defaultPosts: BlogPost[] = [
     slug: "huong-dan-viet-jd",
     categoryId: "cat-guide",
     author: "Trần Bình",
-    cover: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=400",
+    cover: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800",
     excerpt: "Cách xây dựng JD hấp dẫn, đúng trọng tâm.",
-    content: "<p>Một JD tốt cần...</p>",
+    blocks: [{ id: uid(), type: "paragraph", text: "Một JD tốt cần rõ ràng, đúng trọng tâm và truyền cảm hứng cho ứng viên." }],
     status: "draft",
     views: 0,
     createdAt: "2026-05-08T14:22:00Z",
@@ -91,9 +128,9 @@ const defaultPosts: BlogPost[] = [
     slug: "employer-branding-startup",
     categoryId: "cat-marketing",
     author: "Lê Châu",
-    cover: "https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=400",
+    cover: "https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=800",
     excerpt: "Xây dựng thương hiệu nhà tuyển dụng mạnh mẽ.",
-    content: "<p>Employer branding là...</p>",
+    blocks: [{ id: uid(), type: "paragraph", text: "Employer branding là chìa khóa thu hút nhân tài top đầu trong dài hạn." }],
     status: "scheduled",
     views: 0,
     createdAt: "2026-05-01T07:00:00Z",
@@ -106,9 +143,9 @@ const defaultPosts: BlogPost[] = [
     slug: "bao-cao-q1-2026",
     categoryId: "cat-news",
     author: "Nguyễn An",
-    cover: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400",
+    cover: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800",
     excerpt: "Tổng hợp số liệu thị trường nhân sự quý 1.",
-    content: "<p>Báo cáo cho thấy...</p>",
+    blocks: [{ id: uid(), type: "paragraph", text: "Báo cáo cho thấy nhu cầu nhân sự tăng trưởng ở các ngành công nghệ và tài chính." }],
     status: "hidden",
     views: 532,
     createdAt: "2026-03-20T10:00:00Z",
@@ -214,7 +251,7 @@ export const adminActions = {
       author: input.author || "Admin",
       cover: input.cover || "",
       excerpt: input.excerpt || "",
-      content: input.content || "",
+      blocks: input.blocks || [{ id: uid(), type: "paragraph", text: "" }],
       status: input.status || "draft",
       views: 0,
       createdAt: now,
@@ -304,7 +341,8 @@ export function formatDateTime(iso: string | null): string {
   if (!iso) return "—";
   const d = new Date(iso);
   const pad = (n: number) => String(n).padStart(2, "0");
-  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${String(d.getFullYear()).slice(-2)} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  // Use UTC to keep SSR and client output identical (avoids hydration mismatch).
+  return `${pad(d.getUTCDate())}/${pad(d.getUTCMonth() + 1)}/${String(d.getUTCFullYear()).slice(-2)} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
 }
 
 export function formatCurrency(price: string, currency: "VND" | "USD"): string {

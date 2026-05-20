@@ -21,7 +21,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/admin/StatusBadge";
-import { adminActions, type BlogPost, useAdminStore } from "@/lib/admin-store";
+import { BlockEditor } from "@/components/admin/BlockEditor";
+import { BlockRenderer } from "@/components/admin/BlockRenderer";
+import {
+  adminActions,
+  type BlogPost,
+  type ContentBlock,
+  newBlock,
+  useAdminStore,
+} from "@/lib/admin-store";
 import { toast } from "sonner";
 
 interface Props {
@@ -32,6 +40,15 @@ const MAX_TITLE = 200;
 const MAX_FILE_MB = 5;
 const ACCEPTED = ["image/jpeg", "image/jpg", "image/png"];
 
+const blocksHaveContent = (blocks: ContentBlock[]) =>
+  blocks.some((b) => {
+    if (b.type === "paragraph" || b.type === "heading" || b.type === "quote") return b.text.trim();
+    if (b.type === "list") return b.items.some((i) => i.trim());
+    if (b.type === "image") return !!b.src;
+    if (b.type === "gallery") return b.images.length > 0;
+    return false;
+  });
+
 export function PostEditor({ post }: Props) {
   const navigate = useNavigate();
   const categories = useAdminStore((s) => s.categories);
@@ -40,12 +57,16 @@ export function PostEditor({ post }: Props) {
   const [categoryId, setCategoryId] = useState(post?.categoryId || categories[0]?.id || "");
   const [cover, setCover] = useState(post?.cover || "");
   const [excerpt, setExcerpt] = useState(post?.excerpt || "");
-  const [content, setContent] = useState(post?.content || "");
+  const [blocks, setBlocks] = useState<ContentBlock[]>(
+    post?.blocks?.length ? post.blocks : [newBlock("paragraph")],
+  );
   const [dirty, setDirty] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  useEffect(() => { setDirty(false); }, [post?.id]);
+  useEffect(() => {
+    setDirty(false);
+  }, [post?.id]);
 
   useBlocker({
     shouldBlockFn: () => {
@@ -54,14 +75,18 @@ export function PostEditor({ post }: Props) {
     },
   });
 
-  const update = <T,>(setter: (v: T) => void) => (v: T) => { setter(v); setDirty(true); };
+  const markDirty = () => setDirty(true);
+  const onTitle = (v: string) => { setTitle(v); markDirty(); };
+  const onExcerpt = (v: string) => { setExcerpt(v); markDirty(); };
+  const onCategory = (v: string) => { setCategoryId(v); markDirty(); };
+  const onBlocks = (b: ContentBlock[]) => { setBlocks(b); markDirty(); };
 
   const validate = (forPublish: boolean) => {
     const e: Record<string, string> = {};
     if (!title.trim()) e.title = "Tiêu đề bài viết không được để trống.";
     if (title.length > MAX_TITLE) e.title = `Tiêu đề không được vượt quá ${MAX_TITLE} ký tự.`;
     if (forPublish) {
-      if (!content.trim()) e.content = "Nội dung bài viết không được để trống khi xuất bản.";
+      if (!blocksHaveContent(blocks)) e.content = "Nội dung bài viết không được để trống khi xuất bản.";
       if (!categoryId) e.categoryId = "Vui lòng chọn danh mục.";
       if (!cover) e.cover = "Vui lòng tải lên ảnh đại diện.";
     }
@@ -71,16 +96,10 @@ export function PostEditor({ post }: Props) {
 
   const handleFile = (file: File | undefined) => {
     if (!file) return;
-    if (!ACCEPTED.includes(file.type)) {
-      toast.error("Định dạng ảnh không được hỗ trợ. Hỗ trợ JPG, JPEG, PNG.");
-      return;
-    }
-    if (file.size > MAX_FILE_MB * 1024 * 1024) {
-      toast.error(`Ảnh phải nhỏ hơn ${MAX_FILE_MB}MB.`);
-      return;
-    }
+    if (!ACCEPTED.includes(file.type)) return toast.error("Định dạng ảnh không được hỗ trợ. Hỗ trợ JPG, JPEG, PNG.");
+    if (file.size > MAX_FILE_MB * 1024 * 1024) return toast.error(`Ảnh phải nhỏ hơn ${MAX_FILE_MB}MB.`);
     const reader = new FileReader();
-    reader.onload = () => { setCover(reader.result as string); setDirty(true); };
+    reader.onload = () => { setCover(reader.result as string); markDirty(); };
     reader.readAsDataURL(file);
   };
 
@@ -90,16 +109,15 @@ export function PostEditor({ post }: Props) {
       return;
     }
     if (post) {
-      adminActions.updatePost(post.id, { title, categoryId, cover, excerpt, content, status });
+      adminActions.updatePost(post.id, { title, categoryId, cover, excerpt, blocks, status });
       toast.success(status === "published" ? "Đã xuất bản bài viết" : "Đã lưu thay đổi");
+      setDirty(false);
     } else {
-      const created = adminActions.createPost({ title, categoryId, cover, excerpt, content, status });
+      const created = adminActions.createPost({ title, categoryId, cover, excerpt, blocks, status });
       toast.success(status === "published" ? "Đã xuất bản bài viết" : "Đã lưu nháp thành công");
       setDirty(false);
       navigate({ to: "/admin/blog/$postId", params: { postId: created.id } });
-      return;
     }
-    setDirty(false);
   };
 
   return (
@@ -135,13 +153,13 @@ export function PostEditor({ post }: Props) {
 
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <div className="space-y-4">
-          <Card className="p-6 space-y-4">
+          <Card className="space-y-4 p-6">
             <div>
               <Label htmlFor="title">Tiêu đề bài viết *</Label>
               <Input
                 id="title"
                 value={title}
-                onChange={(e) => update(setTitle)(e.target.value)}
+                onChange={(e) => onTitle(e.target.value)}
                 placeholder="Nhập tiêu đề..."
                 className="mt-1.5 text-lg font-medium"
                 maxLength={MAX_TITLE}
@@ -156,7 +174,7 @@ export function PostEditor({ post }: Props) {
               <Textarea
                 id="excerpt"
                 value={excerpt}
-                onChange={(e) => update(setExcerpt)(e.target.value)}
+                onChange={(e) => onExcerpt(e.target.value)}
                 placeholder="Tóm tắt bài viết hiển thị ngoài danh sách..."
                 rows={2}
                 className="mt-1.5"
@@ -165,36 +183,24 @@ export function PostEditor({ post }: Props) {
           </Card>
 
           <Card className="p-6">
-            <Label htmlFor="content">Nội dung bài viết *</Label>
-            <div className="mt-1.5 rounded-md border bg-muted/30">
-              <div className="flex flex-wrap gap-1 border-b p-2 text-xs text-muted-foreground">
-                <button className="rounded px-2 py-1 font-bold hover:bg-background">B</button>
-                <button className="rounded px-2 py-1 italic hover:bg-background">I</button>
-                <button className="rounded px-2 py-1 underline hover:bg-background">U</button>
-                <span className="mx-1 h-4 w-px bg-border" />
-                <button className="rounded px-2 py-1 hover:bg-background">H1</button>
-                <button className="rounded px-2 py-1 hover:bg-background">H2</button>
-                <button className="rounded px-2 py-1 hover:bg-background">Quote</button>
-                <span className="mx-1 h-4 w-px bg-border" />
-                <button className="rounded px-2 py-1 hover:bg-background">Link</button>
-                <button className="rounded px-2 py-1 hover:bg-background">Image</button>
-                <button className="rounded px-2 py-1 hover:bg-background">List</button>
+            <div className="mb-3 flex items-center justify-between">
+              <div>
+                <Label>Nội dung bài viết *</Label>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  Thêm các khối văn bản, ảnh, danh sách... xen kẽ tùy ý. Di chuột vào từng khối để sắp xếp hoặc xóa.
+                </p>
               </div>
-              <Textarea
-                id="content"
-                value={content}
-                onChange={(e) => update(setContent)(e.target.value)}
-                placeholder="Bắt đầu viết nội dung bài viết..."
-                rows={18}
-                className="border-0 bg-transparent focus-visible:ring-0"
-              />
+              <span className="text-xs text-muted-foreground">{blocks.length} khối</span>
             </div>
-            {errors.content && <p className="mt-1 text-xs text-destructive">{errors.content}</p>}
+            <div className="pl-8">
+              <BlockEditor blocks={blocks} onChange={onBlocks} />
+            </div>
+            {errors.content && <p className="mt-2 text-xs text-destructive">{errors.content}</p>}
           </Card>
         </div>
 
         <div className="space-y-4">
-          <Card className="p-5 space-y-3">
+          <Card className="space-y-3 p-5">
             <h3 className="text-sm font-semibold">Ảnh đại diện *</h3>
             {cover ? (
               <div className="relative overflow-hidden rounded-md border">
@@ -203,7 +209,7 @@ export function PostEditor({ post }: Props) {
                   size="icon"
                   variant="secondary"
                   className="absolute right-2 top-2 h-7 w-7"
-                  onClick={() => { setCover(""); setDirty(true); }}
+                  onClick={() => { setCover(""); markDirty(); }}
                 >
                   <X className="h-3.5 w-3.5" />
                 </Button>
@@ -224,11 +230,11 @@ export function PostEditor({ post }: Props) {
             {errors.cover && <p className="text-xs text-destructive">{errors.cover}</p>}
           </Card>
 
-          <Card className="p-5 space-y-3">
+          <Card className="space-y-3 p-5">
             <h3 className="text-sm font-semibold">Phân loại</h3>
             <div>
               <Label className="text-xs">Danh mục *</Label>
-              <Select value={categoryId} onValueChange={(v) => update(setCategoryId)(v)}>
+              <Select value={categoryId} onValueChange={onCategory}>
                 <SelectTrigger className="mt-1.5"><SelectValue placeholder="Chọn danh mục" /></SelectTrigger>
                 <SelectContent>
                   {categories.map((c) => (
@@ -239,21 +245,19 @@ export function PostEditor({ post }: Props) {
               {errors.categoryId && <p className="mt-1 text-xs text-destructive">{errors.categoryId}</p>}
             </div>
             <div className="rounded-md bg-muted/40 p-3 text-xs text-muted-foreground">
-              <div className="flex justify-between"><span>Tác giả</span><span className="font-medium text-foreground">{post?.author || "Admin"}</span></div>
-              {post && (
-                <>
-                  <div className="mt-1 flex justify-between"><span>Đã tạo</span><span>{new Date(post.createdAt).toLocaleDateString("vi-VN")}</span></div>
-                  <div className="mt-1 flex justify-between"><span>Lượt xem</span><span>{post.views.toLocaleString()}</span></div>
-                </>
-              )}
+              <div className="flex justify-between">
+                <span>Tác giả</span>
+                <span className="font-medium text-foreground">{post?.author || "Admin"}</span>
+              </div>
             </div>
           </Card>
 
           <Card className="p-5 text-xs text-muted-foreground">
-            <div className="font-medium text-foreground mb-1">Lưu ý</div>
-            • Lưu nháp không yêu cầu đầy đủ thông tin.<br />
-            • Khi xuất bản, hệ thống sẽ kiểm tra tiêu đề, danh mục, ảnh và nội dung.<br />
-            • Nội dung HTML sẽ được sanitize trước khi hiển thị.
+            <div className="mb-1 font-medium text-foreground">Mẹo soạn thảo</div>
+            • Bấm <span className="font-medium text-foreground">+ Thêm khối</span> giữa các khối để chèn ảnh/văn bản xen kẽ.<br />
+            • Ảnh có thể căn trái/giữa/phải hoặc tràn viền, kèm chú thích.<br />
+            • Dùng khối <span className="font-medium text-foreground">Gallery</span> để chèn nhiều ảnh cùng lúc.<br />
+            • Trong khối danh sách, nhấn <span className="font-medium text-foreground">Enter</span> để xuống dòng mới.
           </Card>
         </div>
       </div>
@@ -268,7 +272,9 @@ export function PostEditor({ post }: Props) {
             {cover && <img src={cover} alt="cover" className="mb-4 aspect-video w-full rounded-md object-cover" />}
             <h2 className="text-2xl font-bold">{title || "Tiêu đề bài viết"}</h2>
             {excerpt && <p className="mt-2 text-muted-foreground">{excerpt}</p>}
-            <div className="prose prose-sm mt-4 max-w-none" dangerouslySetInnerHTML={{ __html: content || "<p><em>Chưa có nội dung</em></p>" }} />
+            <div className="mt-6">
+              <BlockRenderer blocks={blocks} />
+            </div>
           </div>
         </DialogContent>
       </Dialog>
