@@ -2,6 +2,17 @@ import { useSyncExternalStore } from "react";
 
 export type PostStatus = "draft" | "published" | "scheduled" | "hidden";
 
+export type ImageAlign = "left" | "center" | "right" | "full";
+
+export type ContentBlock =
+  | { id: string; type: "paragraph"; text: string }
+  | { id: string; type: "heading"; level: 2 | 3; text: string }
+  | { id: string; type: "quote"; text: string; cite?: string }
+  | { id: string; type: "list"; ordered: boolean; items: string[] }
+  | { id: string; type: "image"; src: string; caption: string; alt: string; align: ImageAlign }
+  | { id: string; type: "gallery"; images: { src: string; caption: string }[] }
+  | { id: string; type: "divider" };
+
 export interface BlogPost {
   id: string;
   title: string;
@@ -10,13 +21,26 @@ export interface BlogPost {
   author: string;
   cover: string;
   excerpt: string;
-  content: string;
+  blocks: ContentBlock[];
   status: PostStatus;
   views: number;
   createdAt: string;
   updatedAt: string;
   publishedAt: string | null;
 }
+
+export const newBlock = (type: ContentBlock["type"]): ContentBlock => {
+  const id = Math.random().toString(36).slice(2, 10);
+  switch (type) {
+    case "paragraph": return { id, type, text: "" };
+    case "heading": return { id, type, level: 2, text: "" };
+    case "quote": return { id, type, text: "", cite: "" };
+    case "list": return { id, type, ordered: false, items: [""] };
+    case "image": return { id, type, src: "", caption: "", alt: "", align: "center" };
+    case "gallery": return { id, type, images: [] };
+    case "divider": return { id, type };
+  }
+};
 
 export interface BlogCategory {
   id: string;
