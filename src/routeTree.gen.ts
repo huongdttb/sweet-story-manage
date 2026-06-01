@@ -13,7 +13,6 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminTokensRouteImport } from './routes/admin.tokens'
 import { Route as AdminPricingRouteImport } from './routes/admin.pricing'
-import { Route as AdminTokensRouteImport } from './routes/admin.tokens'
 import { Route as AdminBlogIndexRouteImport } from './routes/admin.blog.index'
 import { Route as AdminBlogNewRouteImport } from './routes/admin.blog.new'
 import { Route as AdminBlogCategoriesRouteImport } from './routes/admin.blog.categories'
@@ -37,6 +36,11 @@ const AdminTokensRoute = AdminTokensRouteImport.update({
 const AdminPricingRoute = AdminPricingRouteImport.update({
   id: '/pricing',
   path: '/pricing',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminTokensRoute = AdminTokensRouteImport.update({
+  id: '/tokens',
+  path: '/tokens',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminBlogIndexRoute = AdminBlogIndexRouteImport.update({
