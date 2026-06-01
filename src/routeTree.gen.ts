@@ -38,11 +38,6 @@ const AdminPricingRoute = AdminPricingRouteImport.update({
   path: '/pricing',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminTokensRoute = AdminTokensRouteImport.update({
-  id: '/tokens',
-  path: '/tokens',
-  getParentRoute: () => AdminRoute,
-} as any)
 const AdminBlogIndexRoute = AdminBlogIndexRouteImport.update({
   id: '/blog/',
   path: '/blog/',
@@ -68,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/admin/pricing': typeof AdminPricingRoute
+  '/admin/tokens': typeof AdminTokensRoute
   '/admin/tokens': typeof AdminTokensRoute
   '/admin/blog/$postId': typeof AdminBlogPostIdRoute
   '/admin/blog/categories': typeof AdminBlogCategoriesRoute
