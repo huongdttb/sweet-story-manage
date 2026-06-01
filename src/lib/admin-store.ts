@@ -230,16 +230,85 @@ const defaultPlans: PricingPlan[] = [
   },
 ];
 
+const defaultTokenPackages: TokenPackage[] = [
+  {
+    id: uid(),
+    name: "Token Starter",
+    tokens: 100_000,
+    bonusTokens: 0,
+    price: "99000",
+    currency: "VND",
+    badge: "",
+    description: "Phù hợp dùng thử các tính năng AI cơ bản.",
+    validityDays: 90,
+    ctaLabel: "Mua ngay",
+    ctaLink: "/checkout?token=starter",
+    highlighted: false,
+    active: true,
+    order: 1,
+  },
+  {
+    id: uid(),
+    name: "Token Plus",
+    tokens: 500_000,
+    bonusTokens: 50_000,
+    price: "449000",
+    currency: "VND",
+    badge: "popular",
+    description: "Tiết kiệm 10%, tặng thêm 50K token.",
+    validityDays: 180,
+    ctaLabel: "Mua ngay",
+    ctaLink: "/checkout?token=plus",
+    highlighted: true,
+    active: true,
+    order: 2,
+  },
+  {
+    id: uid(),
+    name: "Token Pro",
+    tokens: 1_500_000,
+    bonusTokens: 300_000,
+    price: "1290000",
+    currency: "VND",
+    badge: "best_value",
+    description: "Giá tốt nhất cho đội nhóm dùng AI thường xuyên.",
+    validityDays: 365,
+    ctaLabel: "Mua ngay",
+    ctaLink: "/checkout?token=pro",
+    highlighted: false,
+    active: true,
+    order: 3,
+  },
+  {
+    id: uid(),
+    name: "Token Enterprise",
+    tokens: 5_000_000,
+    bonusTokens: 1_500_000,
+    price: "3990000",
+    currency: "VND",
+    badge: "new",
+    description: "Gói lớn cho doanh nghiệp, kèm hỗ trợ ưu tiên.",
+    validityDays: 0,
+    ctaLabel: "Liên hệ tư vấn",
+    ctaLink: "/contact",
+    highlighted: false,
+    active: true,
+    order: 4,
+  },
+];
+
 interface State {
   posts: BlogPost[];
   categories: BlogCategory[];
   plans: PricingPlan[];
+  tokenPackages: TokenPackage[];
 }
 
 let state: State = {
   posts: defaultPosts,
   categories: defaultCategories,
   plans: defaultPlans,
+  tokenPackages: defaultTokenPackages,
 };
 
 const listeners = new Set<() => void>();
