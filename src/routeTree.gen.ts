@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminTokensRouteImport } from './routes/admin.tokens'
 import { Route as AdminPricingRouteImport } from './routes/admin.pricing'
 import { Route as AdminBlogIndexRouteImport } from './routes/admin.blog.index'
 import { Route as AdminBlogNewRouteImport } from './routes/admin.blog.new'
@@ -26,6 +27,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminTokensRoute = AdminTokensRouteImport.update({
+  id: '/tokens',
+  path: '/tokens',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AdminPricingRoute = AdminPricingRouteImport.update({
   id: '/pricing',
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/admin/pricing': typeof AdminPricingRoute
+  '/admin/tokens': typeof AdminTokensRoute
   '/admin/blog/$postId': typeof AdminBlogPostIdRoute
   '/admin/blog/categories': typeof AdminBlogCategoriesRoute
   '/admin/blog/new': typeof AdminBlogNewRoute
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/admin/pricing': typeof AdminPricingRoute
+  '/admin/tokens': typeof AdminTokensRoute
   '/admin/blog/$postId': typeof AdminBlogPostIdRoute
   '/admin/blog/categories': typeof AdminBlogCategoriesRoute
   '/admin/blog/new': typeof AdminBlogNewRoute
@@ -76,6 +84,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/admin/pricing': typeof AdminPricingRoute
+  '/admin/tokens': typeof AdminTokensRoute
   '/admin/blog/$postId': typeof AdminBlogPostIdRoute
   '/admin/blog/categories': typeof AdminBlogCategoriesRoute
   '/admin/blog/new': typeof AdminBlogNewRoute
@@ -87,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/admin/pricing'
+    | '/admin/tokens'
     | '/admin/blog/$postId'
     | '/admin/blog/categories'
     | '/admin/blog/new'
@@ -96,6 +106,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/admin/pricing'
+    | '/admin/tokens'
     | '/admin/blog/$postId'
     | '/admin/blog/categories'
     | '/admin/blog/new'
@@ -105,6 +116,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/admin/pricing'
+    | '/admin/tokens'
     | '/admin/blog/$postId'
     | '/admin/blog/categories'
     | '/admin/blog/new'
@@ -131,6 +143,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/tokens': {
+      id: '/admin/tokens'
+      path: '/tokens'
+      fullPath: '/admin/tokens'
+      preLoaderRoute: typeof AdminTokensRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/admin/pricing': {
       id: '/admin/pricing'
@@ -172,6 +191,7 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteChildren {
   AdminPricingRoute: typeof AdminPricingRoute
+  AdminTokensRoute: typeof AdminTokensRoute
   AdminBlogPostIdRoute: typeof AdminBlogPostIdRoute
   AdminBlogCategoriesRoute: typeof AdminBlogCategoriesRoute
   AdminBlogNewRoute: typeof AdminBlogNewRoute
@@ -180,6 +200,7 @@ interface AdminRouteChildren {
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminPricingRoute: AdminPricingRoute,
+  AdminTokensRoute: AdminTokensRoute,
   AdminBlogPostIdRoute: AdminBlogPostIdRoute,
   AdminBlogCategoriesRoute: AdminBlogCategoriesRoute,
   AdminBlogNewRoute: AdminBlogNewRoute,
@@ -195,3 +216,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
