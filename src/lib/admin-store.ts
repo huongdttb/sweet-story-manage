@@ -54,6 +54,24 @@ export interface PricingFeature {
   included: boolean;
 }
 
+export interface TokenPackage {
+  id: string;
+  name: string;
+  tokens: number; // base token amount
+  bonusTokens: number; // extra bonus tokens
+  price: string; // numeric string
+  currency: "VND" | "USD";
+  pricePerToken?: string; // derived/display only
+  badge: "" | "popular" | "best_value" | "new";
+  description: string;
+  validityDays: number; // 0 = không hết hạn
+  ctaLabel: string;
+  ctaLink: string;
+  highlighted: boolean;
+  active: boolean;
+  order: number;
+}
+
 export interface PricingPlan {
   id: string;
   name: string;
