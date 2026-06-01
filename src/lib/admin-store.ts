@@ -54,6 +54,24 @@ export interface PricingFeature {
   included: boolean;
 }
 
+export interface TokenPackage {
+  id: string;
+  name: string;
+  tokens: number; // base token amount
+  bonusTokens: number; // extra bonus tokens
+  price: string; // numeric string
+  currency: "VND" | "USD";
+  pricePerToken?: string; // derived/display only
+  badge: "" | "popular" | "best_value" | "new";
+  description: string;
+  validityDays: number; // 0 = không hết hạn
+  ctaLabel: string;
+  ctaLink: string;
+  highlighted: boolean;
+  active: boolean;
+  order: number;
+}
+
 export interface PricingPlan {
   id: string;
   name: string;
@@ -212,16 +230,85 @@ const defaultPlans: PricingPlan[] = [
   },
 ];
 
+const defaultTokenPackages: TokenPackage[] = [
+  {
+    id: uid(),
+    name: "Token Starter",
+    tokens: 100_000,
+    bonusTokens: 0,
+    price: "99000",
+    currency: "VND",
+    badge: "",
+    description: "Phù hợp dùng thử các tính năng AI cơ bản.",
+    validityDays: 90,
+    ctaLabel: "Mua ngay",
+    ctaLink: "/checkout?token=starter",
+    highlighted: false,
+    active: true,
+    order: 1,
+  },
+  {
+    id: uid(),
+    name: "Token Plus",
+    tokens: 500_000,
+    bonusTokens: 50_000,
+    price: "449000",
+    currency: "VND",
+    badge: "popular",
+    description: "Tiết kiệm 10%, tặng thêm 50K token.",
+    validityDays: 180,
+    ctaLabel: "Mua ngay",
+    ctaLink: "/checkout?token=plus",
+    highlighted: true,
+    active: true,
+    order: 2,
+  },
+  {
+    id: uid(),
+    name: "Token Pro",
+    tokens: 1_500_000,
+    bonusTokens: 300_000,
+    price: "1290000",
+    currency: "VND",
+    badge: "best_value",
+    description: "Giá tốt nhất cho đội nhóm dùng AI thường xuyên.",
+    validityDays: 365,
+    ctaLabel: "Mua ngay",
+    ctaLink: "/checkout?token=pro",
+    highlighted: false,
+    active: true,
+    order: 3,
+  },
+  {
+    id: uid(),
+    name: "Token Enterprise",
+    tokens: 5_000_000,
+    bonusTokens: 1_500_000,
+    price: "3990000",
+    currency: "VND",
+    badge: "new",
+    description: "Gói lớn cho doanh nghiệp, kèm hỗ trợ ưu tiên.",
+    validityDays: 0,
+    ctaLabel: "Liên hệ tư vấn",
+    ctaLink: "/contact",
+    highlighted: false,
+    active: true,
+    order: 4,
+  },
+];
+
 interface State {
   posts: BlogPost[];
   categories: BlogCategory[];
   plans: PricingPlan[];
+  tokenPackages: TokenPackage[];
 }
 
 let state: State = {
   posts: defaultPosts,
   categories: defaultCategories,
   plans: defaultPlans,
+  tokenPackages: defaultTokenPackages,
 };
 
 const listeners = new Set<() => void>();
@@ -318,6 +405,25 @@ export const adminActions = {
     state = { ...state, plans };
     emit();
   },
+  // token packages
+  upsertTokenPackage(pkg: TokenPackage) {
+    const exists = state.tokenPackages.some((p) => p.id === pkg.id);
+    state = {
+      ...state,
+      tokenPackages: exists
+        ? state.tokenPackages.map((p) => (p.id === pkg.id ? pkg : p))
+        : [...state.tokenPackages, pkg],
+    };
+    emit();
+  },
+  deleteTokenPackage(id: string) {
+    state = { ...state, tokenPackages: state.tokenPackages.filter((p) => p.id !== id) };
+    emit();
+  },
+  reorderTokenPackages(tokenPackages: TokenPackage[]) {
+    state = { ...state, tokenPackages };
+    emit();
+  },
 };
 
 export const newPlan = (): PricingPlan => ({
@@ -335,7 +441,30 @@ export const newPlan = (): PricingPlan => ({
   order: 999,
 });
 
+export const newTokenPackage = (): TokenPackage => ({
+  id: uid(),
+  name: "",
+  tokens: 100000,
+  bonusTokens: 0,
+  price: "0",
+  currency: "VND",
+  badge: "",
+  description: "",
+  validityDays: 90,
+  ctaLabel: "Mua ngay",
+  ctaLink: "",
+  highlighted: false,
+  active: true,
+  order: 999,
+});
+
 export const newFeatureId = uid;
+
+export function formatTokens(n: number): string {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1) + "M";
+  if (n >= 1_000) return (n / 1_000).toFixed(n % 1_000 === 0 ? 0 : 1) + "K";
+  return String(n);
+}
 
 export function formatDateTime(iso: string | null): string {
   if (!iso) return "—";
