@@ -64,7 +64,6 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/admin/pricing': typeof AdminPricingRoute
   '/admin/tokens': typeof AdminTokensRoute
-  '/admin/tokens': typeof AdminTokensRoute
   '/admin/blog/$postId': typeof AdminBlogPostIdRoute
   '/admin/blog/categories': typeof AdminBlogCategoriesRoute
   '/admin/blog/new': typeof AdminBlogNewRoute
