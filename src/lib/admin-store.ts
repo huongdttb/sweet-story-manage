@@ -405,6 +405,25 @@ export const adminActions = {
     state = { ...state, plans };
     emit();
   },
+  // token packages
+  upsertTokenPackage(pkg: TokenPackage) {
+    const exists = state.tokenPackages.some((p) => p.id === pkg.id);
+    state = {
+      ...state,
+      tokenPackages: exists
+        ? state.tokenPackages.map((p) => (p.id === pkg.id ? pkg : p))
+        : [...state.tokenPackages, pkg],
+    };
+    emit();
+  },
+  deleteTokenPackage(id: string) {
+    state = { ...state, tokenPackages: state.tokenPackages.filter((p) => p.id !== id) };
+    emit();
+  },
+  reorderTokenPackages(tokenPackages: TokenPackage[]) {
+    state = { ...state, tokenPackages };
+    emit();
+  },
 };
 
 export const newPlan = (): PricingPlan => ({
@@ -422,7 +441,30 @@ export const newPlan = (): PricingPlan => ({
   order: 999,
 });
 
+export const newTokenPackage = (): TokenPackage => ({
+  id: uid(),
+  name: "",
+  tokens: 100000,
+  bonusTokens: 0,
+  price: "0",
+  currency: "VND",
+  badge: "",
+  description: "",
+  validityDays: 90,
+  ctaLabel: "Mua ngay",
+  ctaLink: "",
+  highlighted: false,
+  active: true,
+  order: 999,
+});
+
 export const newFeatureId = uid;
+
+export function formatTokens(n: number): string {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1) + "M";
+  if (n >= 1_000) return (n / 1_000).toFixed(n % 1_000 === 0 ? 0 : 1) + "K";
+  return String(n);
+}
 
 export function formatDateTime(iso: string | null): string {
   if (!iso) return "—";
