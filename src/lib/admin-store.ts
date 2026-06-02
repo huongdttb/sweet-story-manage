@@ -487,6 +487,38 @@ export const adminActions = {
     state = { ...state, tokenPackages };
     emit();
   },
+  // AI models catalog
+  addAiModel(name: string) {
+    state = { ...state, aiModels: [...state.aiModels, { id: uid(), name }] };
+    emit();
+  },
+  deleteAiModel(id: string) {
+    state = {
+      ...state,
+      aiModels: state.aiModels.filter((m) => m.id !== id),
+      plans: state.plans.map((p) => ({
+        ...p,
+        allowedModelIds: p.allowedModelIds.filter((mid) => mid !== id),
+      })),
+    };
+    emit();
+  },
+  // Feature catalog
+  addFeatureCatalog(name: string) {
+    state = { ...state, featureCatalog: [...state.featureCatalog, { id: uid(), name }] };
+    emit();
+  },
+  deleteFeatureCatalog(id: string) {
+    state = {
+      ...state,
+      featureCatalog: state.featureCatalog.filter((f) => f.id !== id),
+      plans: state.plans.map((p) => ({
+        ...p,
+        catalogFeatureIds: p.catalogFeatureIds.filter((fid) => fid !== id),
+      })),
+    };
+    emit();
+  },
 };
 
 export const newPlan = (): PricingPlan => ({
@@ -497,6 +529,13 @@ export const newPlan = (): PricingPlan => ({
   cycle: "month",
   description: "",
   features: [{ id: uid(), text: "", included: true }],
+  catalogFeatureIds: [],
+  tokenQuota: 100_000,
+  userQuota: 1,
+  cvStorageQuota: 50,
+  storageGB: 1,
+  workspaceLimit: 1,
+  allowedModelIds: [],
   ctaLabel: "",
   ctaLink: "",
   highlighted: false,
