@@ -79,12 +79,31 @@ export interface PricingPlan {
   currency: "VND" | "USD";
   cycle: "month" | "quarter" | "year";
   description: string;
-  features: PricingFeature[];
+  features: PricingFeature[]; // custom key-features riêng cho gói
+  catalogFeatureIds: string[]; // tick chọn từ danh sách tính năng dùng chung
+  // Hạn mức sử dụng
+  tokenQuota: number; // số token AI được dùng
+  userQuota: number; // số người dùng
+  cvStorageQuota: number; // số CV lưu trữ
+  storageGB: number; // dung lượng lưu trữ (GB)
+  workspaceLimit: number; // số workspaces
+  allowedModelIds: string[]; // model AI được dùng
+  inheritFromPlanId?: string; // gói được kế thừa quyền lợi
   ctaLabel: string;
   ctaLink: string;
   highlighted: boolean;
   active: boolean;
   order: number;
+}
+
+export interface AiModel {
+  id: string;
+  name: string;
+}
+
+export interface FeatureCatalogItem {
+  id: string;
+  name: string;
 }
 
 const uid = () => Math.random().toString(36).slice(2, 10);
