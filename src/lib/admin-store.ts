@@ -361,6 +361,8 @@ interface State {
   categories: BlogCategory[];
   plans: PricingPlan[];
   tokenPackages: TokenPackage[];
+  aiModels: AiModel[];
+  featureCatalog: FeatureCatalogItem[];
 }
 
 let state: State = {
@@ -368,6 +370,8 @@ let state: State = {
   categories: defaultCategories,
   plans: defaultPlans,
   tokenPackages: defaultTokenPackages,
+  aiModels: defaultAiModels,
+  featureCatalog: defaultFeatureCatalog,
 };
 
 const listeners = new Set<() => void>();
