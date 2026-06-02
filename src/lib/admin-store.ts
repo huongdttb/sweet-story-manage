@@ -191,6 +191,32 @@ const defaultPosts: BlogPost[] = [
   },
 ];
 
+const defaultAiModels: AiModel[] = [
+  { id: "gpt-4o-mini", name: "GPT-4o mini" },
+  { id: "gpt-4o", name: "GPT-4o" },
+  { id: "gpt-4.1", name: "GPT-4.1" },
+  { id: "claude-3-5-sonnet", name: "Claude 3.5 Sonnet" },
+  { id: "claude-3-7-sonnet", name: "Claude 3.7 Sonnet" },
+  { id: "gemini-1.5-pro", name: "Gemini 1.5 Pro" },
+  { id: "gemini-2.0-flash", name: "Gemini 2.0 Flash" },
+  { id: "llama-3.1-70b", name: "Llama 3.1 70B" },
+];
+
+const defaultFeatureCatalog: FeatureCatalogItem[] = [
+  { id: "feat-ats", name: "Tích hợp ATS & CRM" },
+  { id: "feat-api", name: "Truy cập API mở rộng" },
+  { id: "feat-sso", name: "Đăng nhập SSO" },
+  { id: "feat-2fa", name: "Bảo mật 2FA bắt buộc" },
+  { id: "feat-export", name: "Xuất dữ liệu (CSV/Excel)" },
+  { id: "feat-report", name: "Báo cáo & phân tích nâng cao" },
+  { id: "feat-ai-jd", name: "Tạo JD bằng AI" },
+  { id: "feat-ai-screen", name: "Sàng lọc CV bằng AI" },
+  { id: "feat-email", name: "Email automation" },
+  { id: "feat-csm", name: "Customer Success Manager riêng" },
+  { id: "feat-sla", name: "Cam kết SLA 99.9%" },
+  { id: "feat-priority", name: "Hỗ trợ ưu tiên 24/7" },
+];
+
 const defaultPlans: PricingPlan[] = [
   {
     id: uid(),
@@ -201,9 +227,14 @@ const defaultPlans: PricingPlan[] = [
     description: "Dành cho cá nhân và đội nhóm mới bắt đầu.",
     features: [
       { id: uid(), text: "Đăng tối đa 3 tin tuyển dụng", included: true },
-      { id: uid(), text: "Quản lý 50 ứng viên", included: true },
-      { id: uid(), text: "Hỗ trợ qua email", included: true },
     ],
+    catalogFeatureIds: ["feat-export"],
+    tokenQuota: 100_000,
+    userQuota: 3,
+    cvStorageQuota: 50,
+    storageGB: 1,
+    workspaceLimit: 1,
+    allowedModelIds: ["gpt-4o-mini", "gemini-2.0-flash"],
     ctaLabel: "Bắt đầu miễn phí",
     ctaLink: "/signup",
     highlighted: false,
@@ -218,11 +249,15 @@ const defaultPlans: PricingPlan[] = [
     cycle: "month",
     description: "Lựa chọn phổ biến nhất cho doanh nghiệp đang phát triển.",
     features: [
-      { id: uid(), text: "Đăng không giới hạn tin tuyển dụng", included: true },
       { id: uid(), text: "Quản lý 1.000 ứng viên", included: true },
-      { id: uid(), text: "Tích hợp ATS & CRM", included: true },
-      { id: uid(), text: "Hỗ trợ ưu tiên 24/7", included: true },
     ],
+    catalogFeatureIds: ["feat-ats", "feat-export", "feat-report", "feat-ai-jd", "feat-ai-screen", "feat-priority"],
+    tokenQuota: 1_000_000,
+    userQuota: 15,
+    cvStorageQuota: 1000,
+    storageGB: 20,
+    workspaceLimit: 3,
+    allowedModelIds: ["gpt-4o-mini", "gpt-4o", "claude-3-5-sonnet", "gemini-1.5-pro", "gemini-2.0-flash"],
     ctaLabel: "Dùng thử 14 ngày",
     ctaLink: "/signup?plan=pro",
     highlighted: true,
@@ -238,9 +273,14 @@ const defaultPlans: PricingPlan[] = [
     description: "Giải pháp riêng cho tập đoàn quy mô lớn.",
     features: [
       { id: uid(), text: "Tùy biến quy trình theo yêu cầu", included: true },
-      { id: uid(), text: "SLA & bảo mật cấp doanh nghiệp", included: true },
-      { id: uid(), text: "Customer Success Manager riêng", included: true },
     ],
+    catalogFeatureIds: ["feat-ats", "feat-api", "feat-sso", "feat-2fa", "feat-export", "feat-report", "feat-ai-jd", "feat-ai-screen", "feat-email", "feat-csm", "feat-sla", "feat-priority"],
+    tokenQuota: 10_000_000,
+    userQuota: 0, // 0 = không giới hạn
+    cvStorageQuota: 0,
+    storageGB: 500,
+    workspaceLimit: 0,
+    allowedModelIds: defaultAiModels.map((m) => m.id),
     ctaLabel: "Liên hệ tư vấn",
     ctaLink: "/contact",
     highlighted: false,
