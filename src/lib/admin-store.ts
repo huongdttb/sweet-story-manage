@@ -568,6 +568,12 @@ export function formatTokens(n: number): string {
   return String(n);
 }
 
+export function formatQuota(n: number, unit = ""): string {
+  if (n === 0) return "Không giới hạn";
+  const suffix = unit ? ` ${unit}` : "";
+  return n.toLocaleString("vi-VN") + suffix;
+}
+
 export function formatDateTime(iso: string | null): string {
   if (!iso) return "—";
   const d = new Date(iso);
