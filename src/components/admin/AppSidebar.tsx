@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Coins, FileText, FolderTree, LayoutDashboard, Tag } from "lucide-react";
+import { Coins, FileText, FolderTree, LayoutDashboard, Sparkles, Tag } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -19,6 +19,7 @@ const blogItems = [
 
 const landingItems = [
   { title: "Bảng giá", url: "/admin/pricing", icon: Tag },
+  { title: "Tính năng & Models", url: "/admin/features", icon: Sparkles },
   { title: "Gói Token AI", url: "/admin/tokens", icon: Coins },
 ];
 

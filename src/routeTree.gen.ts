@@ -13,6 +13,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminTokensRouteImport } from './routes/admin.tokens'
 import { Route as AdminPricingRouteImport } from './routes/admin.pricing'
+import { Route as AdminFeaturesRouteImport } from './routes/admin.features'
 import { Route as AdminBlogIndexRouteImport } from './routes/admin.blog.index'
 import { Route as AdminBlogNewRouteImport } from './routes/admin.blog.new'
 import { Route as AdminBlogCategoriesRouteImport } from './routes/admin.blog.categories'
@@ -36,6 +37,11 @@ const AdminTokensRoute = AdminTokensRouteImport.update({
 const AdminPricingRoute = AdminPricingRouteImport.update({
   id: '/pricing',
   path: '/pricing',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminFeaturesRoute = AdminFeaturesRouteImport.update({
+  id: '/features',
+  path: '/features',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminBlogIndexRoute = AdminBlogIndexRouteImport.update({
@@ -62,6 +68,7 @@ const AdminBlogPostIdRoute = AdminBlogPostIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/admin/features': typeof AdminFeaturesRoute
   '/admin/pricing': typeof AdminPricingRoute
   '/admin/tokens': typeof AdminTokensRoute
   '/admin/blog/$postId': typeof AdminBlogPostIdRoute
@@ -72,6 +79,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/admin/features': typeof AdminFeaturesRoute
   '/admin/pricing': typeof AdminPricingRoute
   '/admin/tokens': typeof AdminTokensRoute
   '/admin/blog/$postId': typeof AdminBlogPostIdRoute
@@ -83,6 +91,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/admin/features': typeof AdminFeaturesRoute
   '/admin/pricing': typeof AdminPricingRoute
   '/admin/tokens': typeof AdminTokensRoute
   '/admin/blog/$postId': typeof AdminBlogPostIdRoute
@@ -95,6 +104,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/admin/features'
     | '/admin/pricing'
     | '/admin/tokens'
     | '/admin/blog/$postId'
@@ -105,6 +115,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/admin/features'
     | '/admin/pricing'
     | '/admin/tokens'
     | '/admin/blog/$postId'
@@ -115,6 +126,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/admin/features'
     | '/admin/pricing'
     | '/admin/tokens'
     | '/admin/blog/$postId'
@@ -158,6 +170,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPricingRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/features': {
+      id: '/admin/features'
+      path: '/features'
+      fullPath: '/admin/features'
+      preLoaderRoute: typeof AdminFeaturesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/blog/': {
       id: '/admin/blog/'
       path: '/blog'
@@ -190,6 +209,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminFeaturesRoute: typeof AdminFeaturesRoute
   AdminPricingRoute: typeof AdminPricingRoute
   AdminTokensRoute: typeof AdminTokensRoute
   AdminBlogPostIdRoute: typeof AdminBlogPostIdRoute
@@ -199,6 +219,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminFeaturesRoute: AdminFeaturesRoute,
   AdminPricingRoute: AdminPricingRoute,
   AdminTokensRoute: AdminTokensRoute,
   AdminBlogPostIdRoute: AdminBlogPostIdRoute,

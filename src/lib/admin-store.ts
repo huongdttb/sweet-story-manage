@@ -492,6 +492,13 @@ export const adminActions = {
     state = { ...state, aiModels: [...state.aiModels, { id: uid(), name }] };
     emit();
   },
+  updateAiModel(id: string, name: string) {
+    state = {
+      ...state,
+      aiModels: state.aiModels.map((m) => (m.id === id ? { ...m, name } : m)),
+    };
+    emit();
+  },
   deleteAiModel(id: string) {
     state = {
       ...state,
@@ -506,6 +513,13 @@ export const adminActions = {
   // Feature catalog
   addFeatureCatalog(name: string) {
     state = { ...state, featureCatalog: [...state.featureCatalog, { id: uid(), name }] };
+    emit();
+  },
+  updateFeatureCatalog(id: string, name: string) {
+    state = {
+      ...state,
+      featureCatalog: state.featureCatalog.map((f) => (f.id === id ? { ...f, name } : f)),
+    };
     emit();
   },
   deleteFeatureCatalog(id: string) {

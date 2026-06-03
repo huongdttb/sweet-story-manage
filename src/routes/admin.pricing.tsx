@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   ArrowDown,
@@ -6,10 +6,12 @@ import {
   Check,
   Copy,
   Cpu,
+  ExternalLink,
   Eye,
   HardDrive,
   Layers,
   Plus,
+  Settings2,
   Sparkles,
   Star,
   Trash2,
@@ -247,8 +249,7 @@ function PlanEditorDialog({
   const featureCatalog = useAdminStore((s) => s.featureCatalog);
   const allPlans = useAdminStore((s) => s.plans);
   const [draft, setDraft] = useState<PricingPlan | null>(null);
-  const [newModelName, setNewModelName] = useState("");
-  const [newFeatureName, setNewFeatureName] = useState("");
+  // catalog add/delete đã chuyển sang trang /admin/features
 
   // sync when plan changes
   if (plan && (!draft || draft.id !== plan.id)) {
@@ -325,20 +326,9 @@ function PlanEditorDialog({
     onClose();
   };
 
-  const addModel = () => {
-    const name = newModelName.trim();
-    if (!name) return;
-    adminActions.addAiModel(name);
-    setNewModelName("");
-  };
-  const addFeature = () => {
-    const name = newFeatureName.trim();
-    if (!name) return;
-    adminActions.addFeatureCatalog(name);
-    setNewFeatureName("");
-  };
 
   const otherPlans = allPlans.filter((p) => p.id !== draft.id);
+
 
   return (
     <Dialog open={!!plan} onOpenChange={(o) => !o && onClose()}>
@@ -439,92 +429,108 @@ function PlanEditorDialog({
           {/* MODELS */}
           <Section
             title="Models AI được sử dụng"
-            desc="Tick chọn các model gói này được phép gọi. Có thể thêm/xóa model dùng chung."
+            desc="Tick chọn các model gói này được phép gọi. Danh sách dùng chung được quản lý ở trang riêng."
+            action={
+              <Button asChild variant="outline" size="sm">
+                <Link to="/admin/features">
+                  <Settings2 className="mr-1 h-3.5 w-3.5" /> Quản lý models
+                  <ExternalLink className="ml-1 h-3 w-3" />
+                </Link>
+              </Button>
+            }
           >
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {aiModels.map((m) => {
-                const checked = draft.allowedModelIds.includes(m.id);
-                return (
-                  <label
-                    key={m.id}
-                    className={`group flex cursor-pointer items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm transition ${checked ? "border-primary bg-primary/5" : "hover:bg-muted/50"}`}
-                  >
-                    <div className="flex items-center gap-2">
+            {aiModels.length === 0 ? (
+              <EmptyCatalog label="Chưa có model nào. Thêm tại trang Quản lý tính năng & models." />
+            ) : (
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {aiModels.map((m) => {
+                  const checked = draft.allowedModelIds.includes(m.id);
+                  return (
+                    <label
+                      key={m.id}
+                      className={`flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm transition ${checked ? "border-primary bg-primary/5" : "hover:bg-muted/50"}`}
+                    >
                       <Checkbox checked={checked} onCheckedChange={() => toggleModel(m.id)} />
                       <span>{m.name}</span>
-                    </div>
-                    <button
-                      type="button"
-                      className="opacity-0 transition group-hover:opacity-100"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (confirm(`Xóa model "${m.name}" khỏi tất cả các gói?`)) {
-                          adminActions.deleteAiModel(m.id);
-                        }
-                      }}
-                    >
-                      <Trash2 className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive" />
-                    </button>
-                  </label>
-                );
-              })}
-            </div>
-            <div className="mt-3 flex gap-2">
-              <Input
-                value={newModelName}
-                onChange={(e) => setNewModelName(e.target.value)}
-                placeholder="Thêm model mới, vd: o1-preview"
-                onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addModel())}
-              />
-              <Button variant="outline" onClick={addModel}>
-                <Plus className="mr-1 h-3.5 w-3.5" /> Thêm
-              </Button>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+              <span>Đã chọn: <span className="font-semibold text-foreground">{draft.allowedModelIds.length}</span> / {aiModels.length}</span>
+              {aiModels.length > 0 && (
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    className="hover:text-foreground underline-offset-2 hover:underline"
+                    onClick={() => update("allowedModelIds", aiModels.map((m) => m.id))}
+                  >
+                    Chọn tất cả
+                  </button>
+                  <button
+                    type="button"
+                    className="hover:text-foreground underline-offset-2 hover:underline"
+                    onClick={() => update("allowedModelIds", [])}
+                  >
+                    Bỏ chọn
+                  </button>
+                </div>
+              )}
             </div>
           </Section>
 
           {/* TÍNH NĂNG TỪ CATALOG */}
           <Section
             title="Tính năng có sẵn"
-            desc="Tick chọn các tính năng gói này được sử dụng. Có thể thêm/xóa tính năng dùng chung."
+            desc="Tick chọn các tính năng gói này được sử dụng. Danh sách dùng chung được quản lý ở trang riêng."
+            action={
+              <Button asChild variant="outline" size="sm">
+                <Link to="/admin/features">
+                  <Settings2 className="mr-1 h-3.5 w-3.5" /> Quản lý tính năng
+                  <ExternalLink className="ml-1 h-3 w-3" />
+                </Link>
+              </Button>
+            }
           >
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              {featureCatalog.map((f) => {
-                const checked = draft.catalogFeatureIds.includes(f.id);
-                return (
-                  <label
-                    key={f.id}
-                    className={`group flex cursor-pointer items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm transition ${checked ? "border-primary bg-primary/5" : "hover:bg-muted/50"}`}
-                  >
-                    <div className="flex items-center gap-2">
+            {featureCatalog.length === 0 ? (
+              <EmptyCatalog label="Chưa có tính năng nào. Thêm tại trang Quản lý tính năng & models." />
+            ) : (
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {featureCatalog.map((f) => {
+                  const checked = draft.catalogFeatureIds.includes(f.id);
+                  return (
+                    <label
+                      key={f.id}
+                      className={`flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm transition ${checked ? "border-primary bg-primary/5" : "hover:bg-muted/50"}`}
+                    >
                       <Checkbox checked={checked} onCheckedChange={() => toggleCatalog(f.id)} />
                       <span>{f.name}</span>
-                    </div>
-                    <button
-                      type="button"
-                      className="opacity-0 transition group-hover:opacity-100"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (confirm(`Xóa tính năng "${f.name}" khỏi danh sách dùng chung?`)) {
-                          adminActions.deleteFeatureCatalog(f.id);
-                        }
-                      }}
-                    >
-                      <Trash2 className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive" />
-                    </button>
-                  </label>
-                );
-              })}
-            </div>
-            <div className="mt-3 flex gap-2">
-              <Input
-                value={newFeatureName}
-                onChange={(e) => setNewFeatureName(e.target.value)}
-                placeholder="Thêm tính năng mới vào danh sách dùng chung"
-                onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addFeature())}
-              />
-              <Button variant="outline" onClick={addFeature}>
-                <Plus className="mr-1 h-3.5 w-3.5" /> Thêm
-              </Button>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+              <span>Đã chọn: <span className="font-semibold text-foreground">{draft.catalogFeatureIds.length}</span> / {featureCatalog.length}</span>
+              {featureCatalog.length > 0 && (
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    className="hover:text-foreground underline-offset-2 hover:underline"
+                    onClick={() => update("catalogFeatureIds", featureCatalog.map((f) => f.id))}
+                  >
+                    Chọn tất cả
+                  </button>
+                  <button
+                    type="button"
+                    className="hover:text-foreground underline-offset-2 hover:underline"
+                    onClick={() => update("catalogFeatureIds", [])}
+                  >
+                    Bỏ chọn
+                  </button>
+                </div>
+              )}
             </div>
           </Section>
 
@@ -601,15 +607,36 @@ function PlanEditorDialog({
   );
 }
 
-function Section({ title, desc, children }: { title: string; desc?: string; children: React.ReactNode }) {
+function Section({
+  title,
+  desc,
+  action,
+  children,
+}: {
+  title: string;
+  desc?: string;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+}) {
   return (
     <div className="rounded-lg border p-4">
-      <div className="mb-3">
-        <h4 className="text-sm font-semibold">{title}</h4>
-        {desc && <p className="mt-0.5 text-xs text-muted-foreground">{desc}</p>}
+      <div className="mb-3 flex items-start justify-between gap-3">
+        <div>
+          <h4 className="text-sm font-semibold">{title}</h4>
+          {desc && <p className="mt-0.5 text-xs text-muted-foreground">{desc}</p>}
+        </div>
+        {action}
       </div>
       <Separator className="mb-3" />
       {children}
+    </div>
+  );
+}
+
+function EmptyCatalog({ label }: { label: string }) {
+  return (
+    <div className="rounded-md border border-dashed bg-muted/30 px-4 py-6 text-center text-sm text-muted-foreground">
+      {label}
     </div>
   );
 }
