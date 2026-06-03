@@ -515,6 +515,13 @@ export const adminActions = {
     state = { ...state, featureCatalog: [...state.featureCatalog, { id: uid(), name }] };
     emit();
   },
+  updateFeatureCatalog(id: string, name: string) {
+    state = {
+      ...state,
+      featureCatalog: state.featureCatalog.map((f) => (f.id === id ? { ...f, name } : f)),
+    };
+    emit();
+  },
   deleteFeatureCatalog(id: string) {
     state = {
       ...state,
