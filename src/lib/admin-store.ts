@@ -492,6 +492,13 @@ export const adminActions = {
     state = { ...state, aiModels: [...state.aiModels, { id: uid(), name }] };
     emit();
   },
+  updateAiModel(id: string, name: string) {
+    state = {
+      ...state,
+      aiModels: state.aiModels.map((m) => (m.id === id ? { ...m, name } : m)),
+    };
+    emit();
+  },
   deleteAiModel(id: string) {
     state = {
       ...state,
