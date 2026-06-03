@@ -249,8 +249,7 @@ function PlanEditorDialog({
   const featureCatalog = useAdminStore((s) => s.featureCatalog);
   const allPlans = useAdminStore((s) => s.plans);
   const [draft, setDraft] = useState<PricingPlan | null>(null);
-  const [newModelName, setNewModelName] = useState("");
-  const [newFeatureName, setNewFeatureName] = useState("");
+  // catalog add/delete đã chuyển sang trang /admin/features
 
   // sync when plan changes
   if (plan && (!draft || draft.id !== plan.id)) {
