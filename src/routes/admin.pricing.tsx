@@ -607,15 +607,36 @@ function PlanEditorDialog({
   );
 }
 
-function Section({ title, desc, children }: { title: string; desc?: string; children: React.ReactNode }) {
+function Section({
+  title,
+  desc,
+  action,
+  children,
+}: {
+  title: string;
+  desc?: string;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+}) {
   return (
     <div className="rounded-lg border p-4">
-      <div className="mb-3">
-        <h4 className="text-sm font-semibold">{title}</h4>
-        {desc && <p className="mt-0.5 text-xs text-muted-foreground">{desc}</p>}
+      <div className="mb-3 flex items-start justify-between gap-3">
+        <div>
+          <h4 className="text-sm font-semibold">{title}</h4>
+          {desc && <p className="mt-0.5 text-xs text-muted-foreground">{desc}</p>}
+        </div>
+        {action}
       </div>
       <Separator className="mb-3" />
       {children}
+    </div>
+  );
+}
+
+function EmptyCatalog({ label }: { label: string }) {
+  return (
+    <div className="rounded-md border border-dashed bg-muted/30 px-4 py-6 text-center text-sm text-muted-foreground">
+      {label}
     </div>
   );
 }
