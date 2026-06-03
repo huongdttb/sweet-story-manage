@@ -19,6 +19,7 @@ const blogItems = [
 
 const landingItems = [
   { title: "Bảng giá", url: "/admin/pricing", icon: Tag },
+  { title: "Tính năng & Models", url: "/admin/features", icon: Sparkles },
   { title: "Gói Token AI", url: "/admin/tokens", icon: Coins },
 ];
 
