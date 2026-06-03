@@ -326,20 +326,9 @@ function PlanEditorDialog({
     onClose();
   };
 
-  const addModel = () => {
-    const name = newModelName.trim();
-    if (!name) return;
-    adminActions.addAiModel(name);
-    setNewModelName("");
-  };
-  const addFeature = () => {
-    const name = newFeatureName.trim();
-    if (!name) return;
-    adminActions.addFeatureCatalog(name);
-    setNewFeatureName("");
-  };
 
   const otherPlans = allPlans.filter((p) => p.id !== draft.id);
+
 
   return (
     <Dialog open={!!plan} onOpenChange={(o) => !o && onClose()}>
