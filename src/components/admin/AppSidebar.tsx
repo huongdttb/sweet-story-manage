@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Coins, FileText, FolderTree, LayoutDashboard, Tag } from "lucide-react";
+import { Coins, FileText, FolderTree, LayoutDashboard, Sparkles, Tag } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
